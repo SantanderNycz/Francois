@@ -1,80 +1,103 @@
-# François (Francinette for Windows)
+# François
 
-A native Windows version of the Francinette tester for 42 projects, without requiring Ubuntu or WSL.
+Versão alternativa do [Francinette](https://github.com/xicodomingues/francinette) para **Windows**, sem precisar de WSL ou Ubuntu.
 
-## Prerequisites
+Usa Docker para rodar o testador dentro de um container Linux. O comando `paco` monta automaticamente o diretório do seu projeto no container.
 
-- [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/)
-- [Git for Windows](https://git-scm.com/download/win)
+---
 
-## Installation
+## Pré-requisitos
 
-1. Clone this repository:
-   \`\`\`
-   git clone https://github.com/your-username/francinette-windows.git
-   \`\`\`
+- [Docker Desktop para Windows](https://www.docker.com/products/docker-desktop/)
+- [Git para Windows](https://git-scm.com/download/win)
 
-2. Navigate to the repository directory:
-   \`\`\`
-   cd francinette-windows
-   \`\`\`
+---
 
-3. Run the installation script:
-   \`\`\`
-   .\install.bat
-   \`\`\`
+## Instalação
 
-## Usage
+### Opção 1 — via página web (recomendado)
 
-Once installed, you can use the `paco` command from any directory containing your 42 project:
+```bash
+# Clone o repositório
+git clone https://github.com/SantanderNycz/Francois.git
+cd Francois
 
-\`\`\`
-cd path\to\your\project
+# Instale as dependências e inicie
+pnpm install
+pnpm dev
+```
+
+Acesse `http://localhost:3000` e clique em **baixar install-francois.bat**.  
+Depois, clique com botão direito no arquivo baixado → **Executar como Administrador**.
+
+### Opção 2 — direto pelo script
+
+```bash
+git clone https://github.com/SantanderNycz/Francois.git
+cd Francois
+```
+
+Clique com botão direito em `install.bat` → **Executar como Administrador**.
+
+---
+
+O instalador irá:
+- Criar `%USERPROFILE%\francois\` com o Dockerfile e o `paco.bat`
+- Construir a imagem Docker `francois` (~5 min na primeira vez)
+- Adicionar `paco` ao PATH do usuário
+- Criar atalho na área de trabalho
+
+---
+
+## Uso
+
+```bash
+cd caminho\para\seu\projeto\42
 paco
-\`\`\`
+```
 
-### Common Commands
+| Comando | Descrição |
+|---|---|
+| `paco` | Rodar todos os testes |
+| `paco libft` | Testar projeto específico |
+| `paco -h` | Mostrar ajuda |
+| `paco -c` | Limpar arquivos temporários |
 
-- `paco`: Run all tests for the current project
-- `paco -h`: Show help
-- `paco -u`: Update Francinette
-- `paco -c`: Clean temporary files
+---
 
-## Supported Projects
+## Projetos suportados
 
-- libft
-- get_next_line
-- ft_printf
-- Born2beroot
-- minitalk
-- push_swap
-- pipex
-- philosophers
-- And more!
+Os mesmos que o Francinette original:
+`libft` · `get_next_line` · `ft_printf` · `born2beroot` · `minitalk` · `push_swap` · `pipex` · `philosophers`
 
-## How It Works
+---
 
-This Windows version of Francinette uses Docker to create a Linux container that runs the original Francinette tester. The `paco` command automatically mounts your current directory into the container, allowing the tests to run on your code without requiring WSL or Ubuntu.
+## Desinstalação
 
-## Troubleshooting
+```bash
+%USERPROFILE%\francois\uninstall.bat
+```
 
-### Docker not running
-Make sure Docker Desktop is running before using Francinette.
+Ou execute `uninstall.bat` na raiz do repositório clonado.
 
-### Path issues
-If the `paco` command is not recognized, make sure the installation directory is in your PATH environment variable.
+---
 
-### File permission errors
-If you encounter permission errors, try running the command prompt or PowerShell as Administrator.
+## Solução de problemas
 
-## Uninstallation
+**`paco` não é reconhecido**  
+→ Reinicie o terminal após a instalação para recarregar o PATH.
 
-To uninstall Francinette for Windows, run:
+**Docker não está em execução**  
+→ Abra o Docker Desktop antes de usar o `paco`.
 
-\`\`\`
-.\uninstall.bat
-\`\`\`
+**Falha no build do Docker**  
+→ Verifique sua internet e se o Docker Desktop está atualizado.
 
-## Credits
+**Erros de permissão**  
+→ Execute o `install.bat` como Administrador.
 
-This project is based on the original [Francinette](https://github.com/xicodomingues/francinette) by xicodomingues and the [francinette-image](https://github.com/WaRtr0/francinette-image) by WaRtr0.
+---
+
+## Créditos
+
+Baseado no [Francinette](https://github.com/xicodomingues/francinette) original por [xicodomingues](https://github.com/xicodomingues).
