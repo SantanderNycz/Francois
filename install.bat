@@ -229,20 +229,19 @@ if %errorlevel% neq 0 (
 
 REM Criar atalho na area de trabalho
 echo [INFO] Criando atalho na area de trabalho...
-set "SCRIPT_PATH=%INSTALL_DIR%\paco.bat"
 set "DESKTOP_PATH=%USERPROFILE%\Desktop"
 set "SHORTCUT_PATH=%DESKTOP_PATH%\Paco.lnk"
 
-powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%SHORTCUT_PATH%'); $Shortcut.TargetPath = '%SCRIPT_PATH%'; $Shortcut.Save()"
+powershell -Command "$s = New-Object -ComObject WScript.Shell; $sc = $s.CreateShortcut('%SHORTCUT_PATH%'); $sc.TargetPath = 'cmd.exe'; $sc.Arguments = '/k echo Francois pronto! Navegue ate seu projeto 42 e execute: paco'; $sc.WorkingDirectory = '%USERPROFILE%'; $sc.Save()"
 
-REM Adicionar ao PATH
+REM Adicionar ao PATH (usa PowerShell para evitar limite de 1024 chars do setx)
 echo [INFO] Adicionando ao PATH...
-setx PATH "%PATH%;%INSTALL_DIR%"
+powershell -Command "[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH', 'User') + ';%INSTALL_DIR%', 'User')"
 
 echo.
 echo [SUCESSO] Instalacao concluida!
 echo.
-echo Voce agora pode usar o comando 'paco' para executar o Francois.
+echo IMPORTANTE: Abra um NOVO terminal para usar o comando 'paco'.
 echo Exemplo: paco -h
 echo.
 echo Um atalho foi criado na sua area de trabalho.
