@@ -224,7 +224,7 @@ echo # Instalar francinette
 echo RUN ./bin/install.sh -y
 echo.
 echo # Criar um script wrapper para executar o francinette
-echo RUN echo '#!/bin/bash' ^> /usr/local/bin/paco ^&^& echo 'cd /project' ^>^> /usr/local/bin/paco ^&^& echo 'exec /francinette/bin/francinette "$@"' ^>^> /usr/local/bin/paco ^&^& chmod +x /usr/local/bin/paco
+echo RUN printf '#^!/bin/bash\\ncd /project\\nexec /francinette/bin/francinette "$@"\\n' ^> /usr/local/bin/paco ^&^& chmod +x /usr/local/bin/paco
 echo.
 echo # Definir o diretorio de trabalho para /project
 echo WORKDIR /project
