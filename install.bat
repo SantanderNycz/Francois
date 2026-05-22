@@ -48,6 +48,8 @@ echo [INFO] Criando Dockerfile...
 >Dockerfile (
     echo FROM ubuntu:22.04
     echo.
+    echo ENV DEBIAN_FRONTEND=noninteractive
+    echo.
     echo # Instalar dependencias
     echo RUN apt-get update ^&^& apt-get install -y \
     echo     python3 \
@@ -65,7 +67,7 @@ echo [INFO] Criando Dockerfile...
     echo     wget \
     echo     pkg-config \
     echo     libssl-dev \
-    echo     ^&^& apt-get clean
+    echo     ^&^& apt-get clean ^&^& rm -rf /var/lib/apt/lists/*
     echo.
     echo # Configurar diretorio de trabalho
     echo WORKDIR /francinette
@@ -77,7 +79,7 @@ echo [INFO] Criando Dockerfile...
     echo RUN ./bin/install.sh -y
     echo.
     echo # Criar um script wrapper para executar o francinette
-    echo RUN bash -c "echo -e '#!/bin/bash\ncd /project\n/francinette/bin/francinette \"\$@\"' > /usr/local/bin/paco && chmod +x /usr/local/bin/paco"
+    echo RUN echo '#!/bin/bash' ^> /usr/local/bin/paco ^&^& echo 'cd /project' ^>^> /usr/local/bin/paco ^&^& echo 'exec /francinette/bin/francinette "$@"' ^>^> /usr/local/bin/paco ^&^& chmod +x /usr/local/bin/paco
     echo.
     echo # Definir o diretorio de trabalho para /project
     echo WORKDIR /project
@@ -219,7 +221,7 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut 
 
 REM Adicionar ao PATH
 echo [INFO] Adicionando ao PATH...
-setx PATH "%PATH%;%INSTALL_DIR%" /M
+setx PATH "%PATH%;%INSTALL_DIR%"
 
 echo.
 echo [SUCESSO] Instalacao concluida!

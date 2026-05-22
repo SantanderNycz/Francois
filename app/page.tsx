@@ -1,20 +1,132 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useState, type ReactNode } from "react"
 import { Download } from "lucide-react"
-import { useEffect, useState } from "react"
+
+const tr = {
+  pt: {
+    terminalTitle: "francois — terminal",
+    prompt: "francois --help",
+    subtitle: "Francinette para Windows · sem WSL · sem Ubuntu",
+    tabs: ["instalar", "uso", "projetos", "ajuda"],
+    install: {
+      s1: "# pré-requisitos",
+      prereqs: [
+        { label: "Docker Desktop", note: "para Windows", href: "https://www.docker.com/products/docker-desktop/" },
+        { label: "Git", note: "para Windows", href: "https://git-scm.com/download/win" },
+      ],
+      s2: "# como instalar",
+      steps: [
+        "1  baixe o script com o botão abaixo",
+        "2  clique com botão direito → Executar como Administrador",
+        "3  aguarde o build do Docker (~5 min)",
+      ],
+      s3: "# o instalador cria",
+      creates: [
+        "~/francois/  com Dockerfile e paco.bat",
+        "imagem Docker  francois",
+        "paco  no PATH do usuário",
+        "atalho  na área de trabalho",
+      ],
+      btn: "baixar install-francois.bat",
+    },
+    usage: {
+      s1: "# uso básico",
+      hint: "execute paco dentro do diretório do seu projeto 42:",
+      s2: "# comandos",
+      cmds: [
+        { cmd: "paco",         note: "rodar todos os testes" },
+        { cmd: "paco libft",   note: "testar projeto específico" },
+        { cmd: "paco -h",      note: "mostrar ajuda" },
+        { cmd: "paco -c",      note: "limpar arquivos temporários" },
+      ],
+    },
+    projects: {
+      s1: "# projetos suportados",
+      hint: "os mesmos que o Francinette original:",
+    },
+    help: {
+      s1: "# solução de problemas",
+      items: [
+        { lvl: "ERRO",   title: "Docker não está em execução",   desc: "inicie o Docker Desktop antes de usar o paco." },
+        { lvl: "ERRO",   title: "paco: command not found",        desc: "reinicie o terminal após a instalação para recarregar o PATH." },
+        { lvl: "ERRO",   title: "falha no build do Docker",       desc: "verifique sua internet e se o Docker Desktop está atualizado." },
+        { lvl: "AVISO",  title: "erros de permissão",             desc: "execute o script de instalação como Administrador." },
+      ],
+    },
+    footer: "baseado no Francinette por xicodomingues",
+  },
+  en: {
+    terminalTitle: "francois — terminal",
+    prompt: "francois --help",
+    subtitle: "Francinette for Windows · no WSL · no Ubuntu",
+    tabs: ["install", "usage", "projects", "help"],
+    install: {
+      s1: "# prerequisites",
+      prereqs: [
+        { label: "Docker Desktop", note: "for Windows", href: "https://www.docker.com/products/docker-desktop/" },
+        { label: "Git", note: "for Windows", href: "https://git-scm.com/download/win" },
+      ],
+      s2: "# how to install",
+      steps: [
+        "1  download the script with the button below",
+        "2  right-click → Run as Administrator",
+        "3  wait for Docker build (~5 min)",
+      ],
+      s3: "# the installer creates",
+      creates: [
+        "~/francois/  with Dockerfile and paco.bat",
+        "Docker image  francois",
+        "paco  in user PATH",
+        "shortcut  on desktop",
+      ],
+      btn: "download install-francois.bat",
+    },
+    usage: {
+      s1: "# basic usage",
+      hint: "run paco inside your 42 project directory:",
+      s2: "# commands",
+      cmds: [
+        { cmd: "paco",         note: "run all tests" },
+        { cmd: "paco libft",   note: "test specific project" },
+        { cmd: "paco -h",      note: "show help" },
+        { cmd: "paco -c",      note: "clean temp files" },
+      ],
+    },
+    projects: {
+      s1: "# supported projects",
+      hint: "same as the original Francinette:",
+    },
+    help: {
+      s1: "# troubleshooting",
+      items: [
+        { lvl: "ERROR",  title: "Docker is not running",    desc: "start Docker Desktop before using paco." },
+        { lvl: "ERROR",  title: "paco: command not found",  desc: "restart your terminal after installation to reload PATH." },
+        { lvl: "ERROR",  title: "Docker build failed",      desc: "check your internet connection and make sure Docker Desktop is up to date." },
+        { lvl: "WARN",   title: "permission errors",        desc: "run the installation script as Administrator." },
+      ],
+    },
+    footer: "based on Francinette by xicodomingues",
+  },
+}
+
+const PROJECTS = [
+  { name: "libft",          desc: "first library" },
+  { name: "get_next_line",  desc: "read line from fd" },
+  { name: "ft_printf",      desc: "recode printf" },
+  { name: "born2beroot",    desc: "system administration" },
+  { name: "minitalk",       desc: "unix signals" },
+  { name: "push_swap",      desc: "sorting algorithms" },
+  { name: "pipex",          desc: "unix pipes" },
+  { name: "philosophers",   desc: "threads & mutexes" },
+]
 
 export default function Home() {
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
+  const [lang, setLang] = useState<"pt" | "en">("pt")
+  const [tab, setTab] = useState(0)
+  const t = tr[lang]
 
   const handleDownload = () => {
-    // Criar o conteúdo do script de instalação
     const installScriptContent = `@echo off
 setlocal enabledelayedexpansion
 
@@ -65,6 +177,8 @@ echo [INFO] Criando Dockerfile...
 (
 echo FROM ubuntu:22.04
 echo.
+echo ENV DEBIAN_FRONTEND=noninteractive
+echo.
 echo # Instalar dependencias
 echo RUN apt-get update ^&^& apt-get install -y \\
 echo     python3 \\
@@ -82,7 +196,7 @@ echo     zsh \\
 echo     wget \\
 echo     pkg-config \\
 echo     libssl-dev \\
-echo     ^&^& apt-get clean
+echo     ^&^& apt-get clean ^&^& rm -rf /var/lib/apt/lists/*
 echo.
 echo # Configurar diretorio de trabalho
 echo WORKDIR /francinette
@@ -94,10 +208,7 @@ echo # Instalar francinette
 echo RUN ./bin/install.sh -y
 echo.
 echo # Criar um script wrapper para executar o francinette
-echo RUN echo '#!/bin/bash\\n\\
-echo cd /project\\n\\
-echo /francinette/bin/francinette "$@"' ^> /usr/local/bin/paco ^&^& \\
-echo     chmod +x /usr/local/bin/paco
+echo RUN echo '#!/bin/bash' ^> /usr/local/bin/paco ^&^& echo 'cd /project' ^>^> /usr/local/bin/paco ^&^& echo 'exec /francinette/bin/francinette "$@"' ^>^> /usr/local/bin/paco ^&^& chmod +x /usr/local/bin/paco
 echo.
 echo # Definir o diretorio de trabalho para /project
 echo WORKDIR /project
@@ -165,23 +276,9 @@ echo ## Como Funciona
 echo.
 echo Esta versão para Windows do Francinette usa Docker para criar um contêiner Linux que executa o testador Francinette original. O comando \`paco\` monta automaticamente seu diretório atual no contêiner, permitindo que os testes sejam executados em seu código sem exigir WSL ou Ubuntu.
 echo.
-echo ## Solução de Problemas
-echo.
-echo ### Docker não está em execução
-echo Certifique-se de que o Docker Desktop esteja em execução antes de usar o François.
-echo.
-echo ### Problemas de PATH
-echo Se o comando \`paco\` não for reconhecido, certifique-se de que o diretório de instalação esteja na variável de ambiente PATH.
-echo.
-echo ### Erros de permissão de arquivo
-echo Se encontrar erros de permissão, tente executar o prompt de comando ou PowerShell como Administrador.
-echo.
-echo ### Erros de build do Docker
-echo Se encontrar erros durante o processo de build do Docker, tente executar o Docker Desktop como Administrador e certifique-se de ter uma conexão estável com a internet.
-echo.
 echo ## Créditos
 echo.
-echo Este projeto é baseado no [Francinette](https://github.com/xicodomingues/francinette^) original por xicodomingues e no [francinette-image](https://github.com/WaRtr0/francinette-image^) por WaRtr0.
+echo Este projeto é baseado no [Francinette](https://github.com/xicodomingues/francinette^) original por xicodomingues.
 ) > README.md
 
 REM Criar script de desinstalacao
@@ -195,16 +292,14 @@ echo.
 echo echo Removendo imagem Docker...
 echo docker rmi francois
 echo.
-echo REM Remover atalho da area de trabalho
 echo echo Removendo atalho da area de trabalho...
-echo set "DESKTOP_PATH=%%USERPROFILE%%\\Desktop"
-echo set "SHORTCUT_PATH=%%DESKTOP_PATH%%\\Paco.lnk"
+echo set "SHORTCUT_PATH=%%USERPROFILE%%\\Desktop\\Paco.lnk"
 echo if exist "%%SHORTCUT_PATH%%" del "%%SHORTCUT_PATH%%"
 echo.
-echo echo.
+echo echo Removendo diretorio de instalacao...
+echo rmdir /s /q "%%USERPROFILE%%\\francois"
+echo.
 echo echo Desinstalacao concluida!
-echo echo.
-echo echo Nota: Talvez seja necessario remover manualmente o diretorio de instalacao do seu PATH.
 echo echo.
 echo pause
 ) > "%INSTALL_DIR%\\uninstall.bat"
@@ -231,7 +326,7 @@ powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut 
 
 REM Adicionar ao PATH
 echo [INFO] Adicionando ao PATH...
-setx PATH "%PATH%;%INSTALL_DIR%" /M
+setx PATH "%PATH%;%INSTALL_DIR%"
 
 echo.
 echo [SUCESSO] Instalacao concluida!
@@ -245,7 +340,6 @@ echo Diretorio de instalacao: %INSTALL_DIR%
 echo.
 pause`
 
-    // Criar o blob e iniciar o download
     const blob = new Blob([installScriptContent], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -257,285 +351,194 @@ pause`
     URL.revokeObjectURL(url)
   }
 
+  const isErr = (lvl: string) => lvl === "ERRO" || lvl === "ERROR"
+
   return (
-    <main className="flex min-h-screen flex-col items-center p-8 bg-slate-50">
-      <div className="max-w-5xl w-full">
-        <div className="flex flex-col items-center text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 mb-4">François</h1>
-          <p className="text-xl text-slate-600 max-w-3xl">
-            A native Windows version of the 42 project tester without WSL or Ubuntu
-          </p>
+    <main className="min-h-screen bg-zinc-950 font-mono text-green-400 flex items-start justify-center p-4 md:p-8">
+      <div className="w-full max-w-3xl">
+
+        {/* Terminal window */}
+        <div className="rounded-lg overflow-hidden border border-zinc-800 shadow-2xl shadow-black/60">
+
+          {/* Title bar */}
+          <div className="bg-zinc-900 flex items-center gap-3 px-4 py-2.5 border-b border-zinc-800">
+            <div className="flex gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
+              <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
+              <span className="w-3 h-3 rounded-full bg-[#28c840]" />
+            </div>
+            <span className="flex-1 text-center text-xs text-zinc-500 select-none">
+              {t.terminalTitle}
+            </span>
+            <button
+              onClick={() => setLang(l => l === "pt" ? "en" : "pt")}
+              className="text-xs text-zinc-500 hover:text-green-400 border border-zinc-700 hover:border-green-800 px-2 py-0.5 rounded transition-colors"
+            >
+              {lang === "pt" ? "EN" : "PT"}
+            </button>
+          </div>
+
+          {/* Prompt header */}
+          <div className="px-6 py-5 bg-black border-b border-zinc-900">
+            <p className="text-xs mb-3 flex items-center gap-1.5">
+              <span className="text-green-600">user@francois</span>
+              <span className="text-zinc-600">:</span>
+              <span className="text-blue-500">~</span>
+              <span className="text-zinc-600">$</span>
+              <span className="text-zinc-400">{t.prompt}</span>
+              <span className="inline-block w-1.5 h-4 bg-zinc-400 animate-pulse" />
+            </p>
+            <h1 className="text-green-300 text-2xl font-bold tracking-widest">François</h1>
+            <p className="text-zinc-500 text-sm mt-1">{t.subtitle}</p>
+          </div>
+
+          {/* Tab bar */}
+          <div className="bg-zinc-900 border-b border-zinc-800 flex overflow-x-auto scrollbar-none">
+            {t.tabs.map((label, i) => (
+              <button
+                key={i}
+                onClick={() => setTab(i)}
+                className={`px-5 py-2.5 text-sm border-b-2 whitespace-nowrap transition-colors ${
+                  tab === i
+                    ? "border-green-500 text-green-300 bg-black/40"
+                    : "border-transparent text-zinc-600 hover:text-zinc-400"
+                }`}
+              >
+                {tab === i && <span className="text-green-600 mr-1">▶</span>}
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          <div className="bg-black/80 p-6 min-h-96 space-y-6">
+
+            {/* ── INSTALL ── */}
+            {tab === 0 && <>
+              <Block label={t.install.s1}>
+                {t.install.prereqs.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm py-0.5">
+                    <span className="text-green-500 w-4 shrink-0">✓</span>
+                    <a href={p.href} target="_blank" rel="noopener noreferrer"
+                       className="text-green-400 hover:text-green-300 underline underline-offset-2">
+                      {p.label}
+                    </a>
+                    <span className="text-zinc-700 text-xs"># {p.note}</span>
+                  </div>
+                ))}
+              </Block>
+
+              <Block label={t.install.s2}>
+                {t.install.steps.map((s, i) => (
+                  <p key={i} className="text-sm py-0.5 text-zinc-400">
+                    <span className="text-zinc-700 mr-2">$</span>{s}
+                  </p>
+                ))}
+              </Block>
+
+              <Block label={t.install.s3}>
+                {t.install.creates.map((c, i) => (
+                  <p key={i} className="text-sm py-0.5 text-zinc-500">
+                    <span className="text-zinc-700 mr-2">─</span>{c}
+                  </p>
+                ))}
+              </Block>
+
+              <button
+                onClick={handleDownload}
+                className="w-full flex items-center justify-center gap-2 py-3 text-sm rounded border border-green-900 hover:border-green-600 bg-green-950/20 hover:bg-green-950/40 text-green-500 hover:text-green-300 transition-all"
+              >
+                <Download className="w-4 h-4" />
+                <span>$ {t.install.btn}</span>
+              </button>
+            </>}
+
+            {/* ── USAGE ── */}
+            {tab === 1 && <>
+              <Block label={t.usage.s1}>
+                <p className="text-zinc-600 text-xs mb-2">{t.usage.hint}</p>
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-3 space-y-0.5">
+                  <p className="text-sm"><span className="text-zinc-700">$ </span><span className="text-green-300">cd ~/42/libft</span></p>
+                  <p className="text-sm"><span className="text-zinc-700">$ </span><span className="text-green-300">paco</span></p>
+                </div>
+              </Block>
+
+              <Block label={t.usage.s2}>
+                <div className="bg-zinc-950 border border-zinc-800 rounded overflow-hidden">
+                  {t.usage.cmds.map((c, i) => (
+                    <div key={i} className="flex gap-4 px-3 py-2 border-b border-zinc-900 last:border-0 text-sm">
+                      <span className="text-green-300 w-36 shrink-0">$ {c.cmd}</span>
+                      <span className="text-zinc-600"># {c.note}</span>
+                    </div>
+                  ))}
+                </div>
+              </Block>
+            </>}
+
+            {/* ── PROJECTS ── */}
+            {tab === 2 && <>
+              <Block label={t.projects.s1}>
+                <p className="text-zinc-600 text-xs mb-3">{t.projects.hint}</p>
+                <div className="bg-zinc-950 border border-zinc-800 rounded p-3">
+                  <p className="text-zinc-700 text-xs mb-3">$ ls -la ~/francinette/testers/</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+                    {PROJECTS.map(p => (
+                      <div key={p.name} className="flex gap-3 text-sm items-baseline">
+                        <span className="text-zinc-800 text-xs shrink-0">drwxr-xr-x</span>
+                        <span className="text-green-400 min-w-36">{p.name}/</span>
+                        <span className="text-zinc-700 text-xs hidden sm:inline"># {p.desc}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Block>
+            </>}
+
+            {/* ── HELP ── */}
+            {tab === 3 && <>
+              <Block label={t.help.s1}>
+                <div className="space-y-2">
+                  {t.help.items.map((item, i) => (
+                    <div key={i} className="bg-zinc-950 border border-zinc-800 rounded p-3">
+                      <p className="text-sm">
+                        <span className={isErr(item.lvl) ? "text-red-400" : "text-yellow-500"}>
+                          [{item.lvl}]
+                        </span>
+                        <span className="text-zinc-300 ml-2">{item.title}</span>
+                      </p>
+                      <p className="text-zinc-600 text-sm mt-1 pl-2 border-l border-zinc-800">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </Block>
+            </>}
+
+          </div>
         </div>
 
-        <Tabs defaultValue="install" className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
-            <TabsTrigger value="install">Installation</TabsTrigger>
-            <TabsTrigger value="usage">Usage</TabsTrigger>
-            <TabsTrigger value="projects">Supported Projects</TabsTrigger>
-            <TabsTrigger value="troubleshooting">Troubleshooting</TabsTrigger>
-          </TabsList>
+        {/* Footer */}
+        <p className="text-zinc-700 text-xs text-center mt-4">
+          François · {t.footer} ·{" "}
+          <a
+            href="https://github.com/xicodomingues/francinette"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-zinc-500 underline underline-offset-2"
+          >
+            github.com/xicodomingues/francinette
+          </a>
+        </p>
 
-          <TabsContent value="install" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Prerequisites</CardTitle>
-                <CardDescription>Make sure you have the following installed on your Windows system</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <div className="flex items-start gap-2">
-                    <div className="rounded-full bg-green-500 p-1 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Docker Desktop for Windows</h3>
-                      <p className="text-sm text-slate-500">
-                        Download and install from{" "}
-                        <a
-                          href="https://www.docker.com/products/docker-desktop/"
-                          className="text-blue-600 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          docker.com
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <div className="rounded-full bg-green-500 p-1 mt-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Git for Windows</h3>
-                      <p className="text-sm text-slate-500">
-                        Download and install from{" "}
-                        <a
-                          href="https://git-scm.com/download/win"
-                          className="text-blue-600 hover:underline"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          git-scm.com
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Installation</CardTitle>
-                <CardDescription>Follow these steps to install François</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-slate-900 rounded-md p-4 text-white font-mono text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">1.</span>
-                    <span>Download the installer script using the button below</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">2.</span>
-                    <span>Right-click on install-francois.bat and select "Run as administrator"</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">3.</span>
-                    <span>Follow the on-screen instructions</span>
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">
-                  The installation script will automatically set up everything you need, including:
-                </p>
-                <ul className="list-disc pl-5 text-sm text-slate-600 space-y-1">
-                  <li>Creating all necessary files</li>
-                  <li>Building the Docker container</li>
-                  <li>Creating shortcuts for easy access</li>
-                  <li>Adding the command to your PATH</li>
-                </ul>
-              </CardContent>
-              <CardFooter>
-                {isClient && (
-                  <Button className="w-full" onClick={handleDownload}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Installer Script
-                  </Button>
-                )}
-              </CardFooter>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="usage" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Basic Usage</CardTitle>
-                <CardDescription>How to use François to test your 42 projects</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-slate-900 rounded-md p-4 text-white font-mono text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">$</span>
-                    <span>cd path\to\your\project</span>
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">$</span>
-                    <span>paco</span>
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">
-                  The <code>paco</code> command will automatically detect your project type and run the appropriate
-                  tests.
-                </p>
-
-                <div className="bg-slate-900 rounded-md p-4 text-white font-mono text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">$</span>
-                    <span>paco -h</span>
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">
-                  Use the <code>-h</code> flag to see all available options.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Advanced Usage</CardTitle>
-                <CardDescription>Additional commands and options</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-slate-900 rounded-md p-4 text-white font-mono text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">$</span>
-                    <span>paco -u</span>
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">Update François to the latest version.</p>
-
-                <div className="bg-slate-900 rounded-md p-4 text-white font-mono text-sm">
-                  <p className="flex items-center gap-2">
-                    <span className="text-slate-500">$</span>
-                    <span>paco -c</span>
-                  </p>
-                </div>
-                <p className="text-sm text-slate-600">Clean temporary files and cached results.</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="projects" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Supported 42 Projects</CardTitle>
-                <CardDescription>François supports the same projects as the original Francinette</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">libft</h3>
-                    <p className="text-sm text-slate-500">Your first library</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">get_next_line</h3>
-                    <p className="text-sm text-slate-500">Reading a line from a fd</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">ft_printf</h3>
-                    <p className="text-sm text-slate-500">Recode printf</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">Born2beroot</h3>
-                    <p className="text-sm text-slate-500">System administration</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">minitalk</h3>
-                    <p className="text-sm text-slate-500">UNIX signals</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">push_swap</h3>
-                    <p className="text-sm text-slate-500">Sorting algorithms</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">pipex</h3>
-                    <p className="text-sm text-slate-500">UNIX pipes</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg border border-slate-200">
-                    <h3 className="font-medium text-slate-900">philosophers</h3>
-                    <p className="text-sm text-slate-500">Threads and mutexes</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="troubleshooting" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Common Issues</CardTitle>
-                <CardDescription>Solutions to frequently encountered problems</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="border-l-4 border-amber-500 pl-4 py-2">
-                  <h3 className="font-medium">Docker not running</h3>
-                  <p className="text-sm text-slate-600">
-                    Make sure Docker Desktop is running before using François. You can check by looking for the Docker
-                    icon in your system tray.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-amber-500 pl-4 py-2">
-                  <h3 className="font-medium">Path issues</h3>
-                  <p className="text-sm text-slate-600">
-                    If the <code>paco</code> command is not recognized, make sure the installation directory is in your
-                    PATH environment variable.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-amber-500 pl-4 py-2">
-                  <h3 className="font-medium">File permission errors</h3>
-                  <p className="text-sm text-slate-600">
-                    If you encounter permission errors, try running the command prompt or PowerShell as Administrator.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-amber-500 pl-4 py-2">
-                  <h3 className="font-medium">Docker build errors</h3>
-                  <p className="text-sm text-slate-600">
-                    If you encounter errors during the Docker build process, try running Docker Desktop as Administrator
-                    and ensure you have a stable internet connection.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
       </div>
     </main>
+  )
+}
+
+function Block({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <p className="text-zinc-600 text-xs mb-2 select-none">{label}</p>
+      {children}
+    </div>
   )
 }

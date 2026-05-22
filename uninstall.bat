@@ -1,14 +1,24 @@
 @echo off
-echo Francinette for Windows - Uninstallation
-echo =======================================
+echo Francois - Desinstalacao
+echo ========================
 echo.
 
-echo Removing Docker image...
-docker rmi francinette-windows
+echo Removendo imagem Docker...
+docker rmi francois
 
 echo.
-echo Uninstallation complete!
+echo Removendo atalho da area de trabalho...
+set "SHORTCUT_PATH=%USERPROFILE%\Desktop\Paco.lnk"
+if exist "%SHORTCUT_PATH%" del "%SHORTCUT_PATH%"
+
 echo.
-echo Note: You may need to manually remove the installation directory from your PATH.
+echo Removendo diretorio de instalacao...
+set "INSTALL_DIR=%USERPROFILE%\francois"
+if exist "%INSTALL_DIR%" rmdir /s /q "%INSTALL_DIR%"
+
+echo.
+echo Desinstalacao concluida!
+echo.
+echo Nota: Remova manualmente "%USERPROFILE%\francois" do seu PATH se necessario.
 echo.
 pause
