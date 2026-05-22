@@ -151,11 +151,11 @@ docker --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [INFO] Docker nao encontrado no PATH. Buscando instalacao...
     set "DOCKER_BIN="
-    for /f "delims=" %%i in ('where /r "%PROGRAMFILES%\Docker" docker.exe 2^>nul') do (
+    for /f "delims=" %%i in ('where /r "%PROGRAMFILES%\\Docker" docker.exe 2^>nul') do (
         if not defined DOCKER_BIN set "DOCKER_BIN=%%~dpi"
     )
     if not defined DOCKER_BIN (
-        for /f "delims=" %%i in ('where /r "%LOCALAPPDATA%\Programs\Docker" docker.exe 2^>nul') do (
+        for /f "delims=" %%i in ('where /r "%LOCALAPPDATA%\\Programs\\Docker" docker.exe 2^>nul') do (
             if not defined DOCKER_BIN set "DOCKER_BIN=%%~dpi"
         )
     )
