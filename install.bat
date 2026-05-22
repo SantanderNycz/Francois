@@ -20,11 +20,22 @@ REM Verificar se o Docker esta instalado
 echo [INFO] Verificando se o Docker esta instalado...
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERRO] Docker nao esta instalado ou nao esta no PATH.
-    echo Por favor, instale o Docker Desktop para Windows primeiro.
-    echo Visite: https://www.docker.com/products/docker-desktop/
-    pause
-    exit /b 1
+    REM Docker nao encontrado no PATH — tentar caminhos padrao do Docker Desktop
+    if exist "%PROGRAMFILES%\Docker\Docker\resources\bin\docker.exe" (
+        set "PATH=!PATH!;%PROGRAMFILES%\Docker\Docker\resources\bin"
+        echo [INFO] Docker encontrado. Adicionando ao PATH desta sessao...
+    ) else if exist "%LOCALAPPDATA%\Programs\Docker\Docker\resources\bin\docker.exe" (
+        set "PATH=!PATH!;%LOCALAPPDATA%\Programs\Docker\Docker\resources\bin"
+        echo [INFO] Docker encontrado. Adicionando ao PATH desta sessao...
+    ) else (
+        echo [ERRO] Docker nao encontrado no PATH nem nos caminhos padrao.
+        echo Certifique-se de que o Docker Desktop esta instalado.
+        echo Se ja estiver instalado, tente:
+        echo   1. Fechar e reabrir o terminal
+        echo   2. Reiniciar o computador apos a instalacao do Docker
+        pause
+        exit /b 1
+    )
 )
 
 REM Verificar se o Docker esta em execucao
