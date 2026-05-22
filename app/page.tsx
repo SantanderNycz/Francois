@@ -237,14 +237,30 @@ REM Criar script paco.bat
 echo [INFO] Criando script paco.bat...
 (
 echo @echo off
-echo setlocal
+echo setlocal enabledelayedexpansion
 echo.
-echo REM Obter diretorio atual
+echo docker --version ^>nul 2^>^&1
+echo if %%errorlevel%% neq 0 ^(
+echo     set "DOCKER_BIN="
+echo     for /f "delims=" %%%%i in ^('where /r "%%PROGRAMFILES%%\\Docker" docker.exe 2^^^>nul'^) do ^(
+echo         if not defined DOCKER_BIN set "DOCKER_BIN=%%%%~dpi"
+echo     ^)
+echo     if not defined DOCKER_BIN ^(
+echo         for /f "delims=" %%%%i in ^('where /r "%%LOCALAPPDATA%%\\Programs\\Docker" docker.exe 2^^^>nul'^) do ^(
+echo             if not defined DOCKER_BIN set "DOCKER_BIN=%%%%~dpi"
+echo         ^)
+echo     ^)
+echo     if defined DOCKER_BIN ^(
+echo         set "PATH=^^!PATH^^!;^^!DOCKER_BIN^^!"
+echo     ^) else ^(
+echo         echo [ERRO] Docker nao encontrado. Abra o Docker Desktop.
+echo         pause
+echo         exit /b 1
+echo     ^)
+echo ^)
+echo.
 echo set CURRENT_DIR=%%cd%%
-echo.
-echo REM Executar francinette no Docker com o diretorio atual montado
 echo docker run --rm -it -v "%%CURRENT_DIR%%:/project" francois %%*
-echo.
 echo endlocal
 ) > "%INSTALL_DIR%\\paco.bat"
 

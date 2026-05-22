@@ -108,7 +108,29 @@ REM Criar script paco.bat
 echo [INFO] Criando script paco.bat...
 >"%INSTALL_DIR%\paco.bat" (
     echo @echo off
-    echo setlocal
+    echo setlocal enabledelayedexpansion
+    echo.
+    echo REM Verificar se docker esta no PATH
+    echo docker --version ^>nul 2^>^&1
+    echo if %%errorlevel%% neq 0 ^(
+    echo     set "DOCKER_BIN="
+    echo     for /f "delims=" %%%%i in ^('where /r "%%PROGRAMFILES%%\Docker" docker.exe 2^^^>nul'^) do ^(
+    echo         if not defined DOCKER_BIN set "DOCKER_BIN=%%%%~dpi"
+    echo     ^)
+    echo     if not defined DOCKER_BIN ^(
+    echo         for /f "delims=" %%%%i in ^('where /r "%%LOCALAPPDATA%%\Programs\Docker" docker.exe 2^^^>nul'^) do ^(
+    echo             if not defined DOCKER_BIN set "DOCKER_BIN=%%%%~dpi"
+    echo         ^)
+    echo     ^)
+    echo     if defined DOCKER_BIN ^(
+    echo         set "PATH=^^!PATH^^!;^^!DOCKER_BIN^^!"
+    echo     ^) else ^(
+    echo         echo [ERRO] Docker nao encontrado.
+    echo         echo Certifique-se de que o Docker Desktop esta instalado e em execucao.
+    echo         pause
+    echo         exit /b 1
+    echo     ^)
+    echo ^)
     echo.
     echo REM Obter diretorio atual
     echo set CURRENT_DIR=%%cd%%
