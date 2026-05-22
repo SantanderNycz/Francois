@@ -20,19 +20,24 @@ REM Verificar se o Docker esta instalado
 echo [INFO] Verificando se o Docker esta instalado...
 docker --version >nul 2>&1
 if %errorlevel% neq 0 (
-    REM Docker nao encontrado no PATH — tentar caminhos padrao do Docker Desktop
-    if exist "%PROGRAMFILES%\Docker\Docker\resources\bin\docker.exe" (
-        set "PATH=!PATH!;%PROGRAMFILES%\Docker\Docker\resources\bin"
-        echo [INFO] Docker encontrado. Adicionando ao PATH desta sessao...
-    ) else if exist "%LOCALAPPDATA%\Programs\Docker\Docker\resources\bin\docker.exe" (
-        set "PATH=!PATH!;%LOCALAPPDATA%\Programs\Docker\Docker\resources\bin"
-        echo [INFO] Docker encontrado. Adicionando ao PATH desta sessao...
+    echo [INFO] Docker nao encontrado no PATH. Buscando instalacao...
+    set "DOCKER_BIN="
+    for /f "delims=" %%i in ('where /r "%PROGRAMFILES%\Docker" docker.exe 2^>nul') do (
+        if not defined DOCKER_BIN set "DOCKER_BIN=%%~dpi"
+    )
+    if not defined DOCKER_BIN (
+        for /f "delims=" %%i in ('where /r "%LOCALAPPDATA%\Programs\Docker" docker.exe 2^>nul') do (
+            if not defined DOCKER_BIN set "DOCKER_BIN=%%~dpi"
+        )
+    )
+    if defined DOCKER_BIN (
+        set "PATH=!PATH!;!DOCKER_BIN!"
+        echo [INFO] Docker encontrado em: !DOCKER_BIN!
     ) else (
-        echo [ERRO] Docker nao encontrado no PATH nem nos caminhos padrao.
-        echo Certifique-se de que o Docker Desktop esta instalado.
-        echo Se ja estiver instalado, tente:
-        echo   1. Fechar e reabrir o terminal
-        echo   2. Reiniciar o computador apos a instalacao do Docker
+        echo [ERRO] Docker nao encontrado nos caminhos padrao.
+        echo Certifique-se de que o Docker Desktop esta instalado e tente:
+        echo   1. Fechar e reabrir este terminal
+        echo   2. Reiniciar o computador apos instalar o Docker Desktop
         pause
         exit /b 1
     )
